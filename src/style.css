@@ -41,7 +41,40 @@ header.panel {
 
 header h1 {
   font-size: 15px;
-  margin: 0 0 6px;
+  margin: 0;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+#info-btn {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  color: #9199a6;
+  cursor: pointer;
+  font-size: 11px;
+  font-style: italic;
+  font-family: Georgia, serif;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+#info-btn:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #e8e8ea;
 }
 
 .row {
@@ -195,4 +228,98 @@ code {
 
 #board.on-cooldown {
   cursor: not-allowed;
+}
+
+/* ── Info modal ──────────────────────────────────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(5px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modal-fade 0.2s ease;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal-card {
+  background: rgba(22, 25, 31, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 28px 28px 22px;
+  max-width: 360px;
+  width: calc(100vw - 40px);
+  animation: modal-rise 0.25s ease;
+}
+
+.modal-card h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e8e8ea;
+}
+
+.modal-card > p {
+  margin: 0 0 18px;
+  color: #9199a6;
+  font-size: 13px;
+}
+
+.modal-list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #c8cdd6;
+  line-height: 1.5;
+}
+
+.modal-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.modal-close-btn {
+  display: block;
+  width: 100%;
+  padding: 9px;
+  background: rgba(61, 169, 252, 0.15);
+  border: 1px solid rgba(61, 169, 252, 0.35);
+  border-radius: 8px;
+  color: #3da9fc;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.modal-close-btn:hover {
+  background: rgba(61, 169, 252, 0.25);
+  border-color: rgba(61, 169, 252, 0.6);
+}
+
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

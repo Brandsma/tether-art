@@ -18,13 +18,13 @@ npm install
 npm run dev
 ```
 
-Open the printed URL in two browser tabs (or two machines) — after a few
+Open the printed URL in two browser tabs (or two machines). After a few
 seconds they discover each other and share one canvas. Useful dev params:
 
 | URL param        | Effect                                              |
 | ---------------- | --------------------------------------------------- |
 | `?room=test`     | Join a separate canvas instead of the default room. |
-| `?cooldown=2000` | 2 s pixel cooldown for this tab (dev only — peers still validate against their own configured limit). |
+| `?cooldown=2000` | 2 s pixel cooldown for this tab (dev only; peers still validate against their own configured limit). |
 | `?peerwait=3000` | Shorter initial peer search.                        |
 
 Other scripts: `npm test` (unit tests), `npm run build` (typecheck + bundle
@@ -32,29 +32,29 @@ to `dist/`), `npm run preview`.
 
 ## How it works
 
-### Transport & discovery — Trystero (WebRTC)
+### Transport & discovery: Trystero (WebRTC)
 
 Peers meet through [Trystero](https://github.com/dmotz/trystero) using the
 Nostr strategy: the WebRTC handshake is relayed through a handful of public
 Nostr relays, then all application data flows directly peer-to-peer over
-WebRTC data channels in a full mesh. There is no app-specific server — the
-relays are public infrastructure used only for matchmaking, never for
-drawing data. The strategy can be swapped (`trystero/torrent`,
-`trystero/mqtt`, …) by changing one import in `src/net/sync.ts`.
+WebRTC data channels in a full mesh. The relays are public infrastructure
+used only for matchmaking; no drawing data passes through them. The strategy
+can be swapped (`trystero/torrent`, `trystero/mqtt`, …) by changing one
+import in `src/net/sync.ts`.
 
 ### The drawing is a CRDT
 
 `src/state/pixelGrid.ts` holds the canvas as a grid of last-writer-wins
 registers in flat typed arrays (~12 bytes/pixel):
 
-- `colors` — 0xRRGGBB per pixel
-- `clocks` — Lamport clock of the write that set the pixel
-- `writers` — hash of the writer's peer id
+- `colors`: 0xRRGGBB per pixel
+- `clocks`: Lamport clock of the write that set the pixel
+- `writers`: hash of the writer's peer id
 
 A write wins if its clock is higher; ties break by writer hash, then color.
 Every peer applies the same deterministic rule, so replicas converge no
-matter the order updates arrive in. No history is kept — current state only,
-which is exactly what an r/place canvas needs.
+matter the order updates arrive in. Only current state is kept, which is
+exactly what an r/place canvas needs.
 
 ### Protocol (3 Trystero actions)
 
@@ -65,7 +65,7 @@ which is exactly what an r/place canvas needs.
 | `meta`  | message   | Announce `{sessionId, createdAt}` for session arbitration.     |
 
 Snapshots are the three typed arrays deflated with the built-in
-CompressionStream — a young canvas is a few KB, a fully painted one ~a few MB.
+CompressionStream; a young canvas is a few KB, a fully painted one ~a few MB.
 
 ### Session lifecycle
 
@@ -74,14 +74,14 @@ CompressionStream — a young canvas is a few KB, a fully painted one ~a few MB.
    with timeout). The first valid response sets the local session.
 3. If the search ends empty-handed, the tab mints a fresh session
    (`{id, createdAt}`) and announces it.
-4. If two sessions ever meet — two tabs started fresh simultaneously, or
-   separate groups merge — everyone converges on the *older* session
+4. If two sessions ever meet (two tabs started fresh simultaneously, or
+   separate groups merging), everyone converges on the *older* session
    (ties broken by id): peers holding the loser fetch the winner's snapshot
    and switch. Pixel updates carry the session id, so writes from a
    different session are never merged into the wrong drawing.
 
 "Persistence" is therefore purely social: the drawing survives exactly as
-long as someone keeps it open. Nothing is written to disk by design.
+long as someone keeps it open.
 
 ### Rate limiting
 
@@ -92,12 +92,12 @@ The 1-pixel-per-minute rule is enforced twice:
 - Cooperatively: every client drops incoming updates from a peer that sends
   faster than `cooldownMs × remoteRateTolerance` (default 80%, to absorb
   clock drift). There is no authority in a serverless network, so a modified
-  client can cheat — honest peers just ignore the excess. Real enforcement
-  (signed updates, proof-of-work per pixel) is future work.
+  client can cheat; honest peers just ignore the excess. Real enforcement
+  (signed updates, proof-of-work per pixel) isn't implemented.
 
 ## Deployment
 
-The app is a static bundle — any HTTPS host works (HTTPS is required for
+The app is a static bundle. Any HTTPS host works (HTTPS is required for
 WebCrypto/WebRTC). [`/.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
 deploys to **GitHub Pages** on every push to `main`: install → test → build
 → publish `dist/` via the official Pages actions. The workflow enables Pages
@@ -109,7 +109,7 @@ works at `https://<user>.github.io/<repo>/` and custom domains alike.
 
 All knobs live in `src/config.ts`: canvas size, cooldown, Trystero `appId`,
 room name, search/snapshot timeouts. Canvas size and cooldown are part of
-the protocol — ship the same values to all clients.
+the protocol; ship the same values to all clients.
 
 ## Project layout
 
@@ -144,4 +144,4 @@ src/
   being reachable (configurable via `relayConfig.urls` if needed).
 - **Touch**: pan and tap work; pinch-zoom isn't implemented yet.
 - Two tabs in one browser share the localStorage cooldown but count as two
-  peers — handy for testing, slightly lenient for cheaters.
+  peers, handy for testing but slightly lenient for cheaters.

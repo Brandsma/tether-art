@@ -6,6 +6,7 @@ import { SyncEngine } from './net/sync'
 import { PixelGrid } from './state/pixelGrid'
 import { CanvasView } from './ui/canvasView'
 import { formatMs, Hud } from './ui/hud'
+import { initInfoModal } from './ui/infoModal'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#board')
 if (!canvas) throw new Error('missing #board canvas')
@@ -49,6 +50,7 @@ hud.setCooldown(cooldown.msRemaining(), config.cooldownMs)
 window.addEventListener('beforeunload', () => sync.stop())
 
 sync.start()
+initInfoModal(config.cooldownMs)
 
 // Dev console handle (e.g. p2p.sync.peerCount in the browser console).
 Object.assign(globalThis, { p2p: { grid, view, sync, config } })
