@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>P2P Pixel Canvas</title>
+  </head>
+  <body>
+    <canvas id="board"></canvas>
+
+    <header class="panel">
+      <h1>P2P Pixel Canvas</h1>
+      <div class="row"><span id="status-dot" class="dot"></span><span id="status-text">starting…</span></div>
+      <div class="row">session&nbsp;<code id="session-id">—</code></div>
+      <div class="row"><span id="peer-count">0</span>&nbsp;peer(s) connected</div>
+      <div class="row hint">drag to pan · scroll to zoom · click to paint</div>
+    </header>
+
+    <footer class="panel">
+      <div id="swatches"></div>
+      <input id="color-input" type="color" value="#1e90ff" title="pick any color" />
+      <span id="cooldown-text">…</span>
+    </footer>
+
+    <div id="toast" hidden></div>
+
+    <noscript>This app needs JavaScript (and WebRTC).</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

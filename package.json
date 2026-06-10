@@ -1,0 +1,21 @@
+{
+  "name": "p2p-pixel-canvas",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Collaborative pixel canvas that syncs peer-to-peer. The drawing lives only in the browsers of its peers.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "trystero": "^0.25.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  }
+}
