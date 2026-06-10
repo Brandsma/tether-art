@@ -30,6 +30,7 @@ export class CanvasView {
   private hoverIndex = -1
   private bufferDirty = true
   private viewDirty = true
+  private ripples: Array<{ x: number; y: number; color: number; startedAt: number }> = []
   private drag: {
     pointerId: number
     startX: number
@@ -76,24 +77,27 @@ export class CanvasView {
   repaintPixel(index: number): void {
     this.pixels[index] = toAbgr(this.grid.colors[index])
     this.bufferDirty = true
+    this.triggerRipple(index, this.grid.colors[index])
   }
 
   // ----- render loop ------------------------------------------------------
 
   private readonly frame = (): void => {
+    const now = performance.now()
     if (this.bufferDirty) {
       this.bufferCtx.putImageData(this.image, 0, 0)
       this.bufferDirty = false
       this.viewDirty = true
     }
     if (this.viewDirty) {
-      this.draw()
+      this.draw(now)
       this.viewDirty = false
     }
+    if (this.ripples.length > 0) this.viewDirty = true
     requestAnimationFrame(this.frame)
   }
 
-  private draw(): void {
+  private draw(now: number): void {
     const { ctx, canvas } = this
     const dpr = window.devicePixelRatio || 1
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -113,6 +117,26 @@ export class CanvasView {
       ctx.lineWidth = 2.5 / (dpr * this.scale)
       ctx.strokeRect(x, y, 1, 1)
     }
+
+    const duration = 320
+    const activeRipples: typeof this.ripples = []
+    for (const ripple of this.ripples) {
+      const elapsed = now - ripple.startedAt
+      if (elapsed > duration) continue
+      const progress = elapsed / duration
+      const radius = progress * 4
+      const alpha = (1 - progress) * 0.7
+      const r = (ripple.color >>> 16) & 0xff
+      const g = (ripple.color >>> 8) & 0xff
+      const b = ripple.color & 0xff
+      ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`
+      ctx.lineWidth = 1.2 / (dpr * this.scale)
+      ctx.beginPath()
+      ctx.arc(ripple.x, ripple.y, radius, 0, Math.PI * 2)
+      ctx.stroke()
+      activeRipples.push(ripple)
+    }
+    this.ripples = activeRipples
   }
 
   private resize(): void {
@@ -197,6 +221,14 @@ export class CanvasView {
       this.hoverIndex = index
       this.viewDirty = true
     }
+  }
+
+  private triggerRipple(index: number, color: number): void {
+    const x = index % this.grid.width
+    const y = Math.floor(index / this.grid.width)
+    this.ripples.push({ x: x + 0.5, y: y + 0.5, color, startedAt: performance.now() })
+    if (this.ripples.length > 40) this.ripples.splice(0, this.ripples.length - 40)
+    this.viewDirty = true
   }
 }
 

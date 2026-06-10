@@ -1,4 +1,5 @@
 import './style.css'
+import { soundEngine } from './audio/sounds'
 import { config } from './config'
 import { Cooldown } from './rateLimit'
 import { SyncEngine } from './net/sync'
@@ -39,10 +40,11 @@ view.onPixelClick = index => {
   sync.placePixel(index, hud.color)
   cooldown.markUsed()
   view.repaintPixel(index)
+  soundEngine.playPixelPlace(hud.color)
 }
 
-setInterval(() => hud.setCooldown(cooldown.msRemaining()), 200)
-hud.setCooldown(cooldown.msRemaining())
+setInterval(() => hud.setCooldown(cooldown.msRemaining(), config.cooldownMs), 200)
+hud.setCooldown(cooldown.msRemaining(), config.cooldownMs)
 
 window.addEventListener('beforeunload', () => sync.stop())
 
