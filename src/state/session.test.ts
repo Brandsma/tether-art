@@ -23,4 +23,9 @@ describe('session', () => {
     expect(preferredSession(a, b).id).toBe('aaa')
     expect(preferredSession(b, a).id).toBe('aaa')
   })
+
+  it('preferredSession is stable when given the same session twice', () => {
+    const s = { id: 'abc', createdAt: 100 }
+    expect(preferredSession(s, s)).toBe(s)
+  })
 })

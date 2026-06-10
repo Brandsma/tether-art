@@ -32,6 +32,25 @@ describe('snapshot codec', () => {
     const view = padded.subarray(3)
     expect(decodeSnapshot(view)).not.toBeNull()
   })
+
+  it('rejects headers with missing required fields', () => {
+    // Valid length prefix pointing to an object that is missing width/height
+    const incomplete = JSON.stringify({ sessionId: 'abc', createdAt: 1234 })
+    const headerBytes = new TextEncoder().encode(incomplete)
+    const out = new Uint8Array(4 + headerBytes.byteLength)
+    new DataView(out.buffer).setUint32(0, headerBytes.byteLength, true)
+    out.set(headerBytes, 4)
+    expect(decodeSnapshot(out)).toBeNull()
+  })
+
+  it('rejects headers with wrong field types', () => {
+    const bad = JSON.stringify({ sessionId: 42, createdAt: 'not-a-number', width: 10, height: 10 })
+    const headerBytes = new TextEncoder().encode(bad)
+    const out = new Uint8Array(4 + headerBytes.byteLength)
+    new DataView(out.buffer).setUint32(0, headerBytes.byteLength, true)
+    out.set(headerBytes, 4)
+    expect(decodeSnapshot(out)).toBeNull()
+  })
 })
 
 describe('compress', () => {

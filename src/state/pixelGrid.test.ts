@@ -89,4 +89,44 @@ describe('PixelGrid', () => {
     expect(grid.indexOf(0, 5)).toBe(-1)
     expect(grid.indexOf(-1, 0)).toBe(-1)
   })
+
+  it('setLocal masks color to 24 bits', () => {
+    const grid = new PixelGrid(4, 4)
+    const update = grid.setLocal(0, 0xffabcdef, 1, 'session-1')
+    expect(update.c).toBe(0xabcdef)
+    expect(grid.colors[0]).toBe(0xabcdef)
+  })
+
+  it('applies color as the tie-break when clock and writer hash are equal', () => {
+    // Same clock, same writer → higher color value wins
+    const low  = update(0, 0x000001, 5, 99)
+    const high = update(0, 0xfffffe, 5, 99)
+    const a = new PixelGrid(4, 4)
+    const b = new PixelGrid(4, 4)
+    a.apply(low)
+    a.apply(high)
+    b.apply(high)
+    b.apply(low)
+    expect(a.colors[0]).toBe(0xfffffe)
+    expect(a.colors[0]).toBe(b.colors[0])
+  })
+
+  it('apply is idempotent — reapplying the same update returns false', () => {
+    const grid = new PixelGrid(4, 4)
+    const u = update(0, 0x111111, 5, 1)
+    expect(grid.apply(u)).toBe(true)
+    expect(grid.apply(u)).toBe(false)
+    expect(grid.colors[0]).toBe(0x111111)
+  })
+
+  it('multiple setLocal calls increment the Lamport counter monotonically', () => {
+    const grid = new PixelGrid(4, 4)
+    const u1 = grid.setLocal(0, 0xff0000, 1, 'session-1')
+    const u2 = grid.setLocal(1, 0x00ff00, 1, 'session-1')
+    const u3 = grid.setLocal(2, 0x0000ff, 1, 'session-1')
+    expect(u1.k).toBe(1)
+    expect(u2.k).toBe(2)
+    expect(u3.k).toBe(3)
+    expect(grid.lamport).toBe(3)
+  })
 })

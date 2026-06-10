@@ -35,4 +35,45 @@ describe('RemoteRateValidator', () => {
     validator.forget('peer-a')
     expect(validator.accept('peer-a', t0 + 2_000)).toBe(true)
   })
+
+  it('with tolerance=1.0 requires the full interval before accepting again', () => {
+    const validator = new RemoteRateValidator(60_000, 1.0)
+    const t0 = 1_000_000
+    expect(validator.accept('peer-a', t0)).toBe(true)
+    expect(validator.accept('peer-a', t0 + 59_999)).toBe(false)
+    expect(validator.accept('peer-a', t0 + 60_000)).toBe(true)
+  })
+
+  it('forget on an unknown peer is a no-op', () => {
+    const validator = new RemoteRateValidator(60_000, 0.8)
+    expect(() => validator.forget('unknown-peer')).not.toThrow()
+  })
+
+  it('counts each peer separately — one busy peer does not block others', () => {
+    const validator = new RemoteRateValidator(60_000, 1.0)
+    const t0 = 1_000_000
+    validator.accept('peer-a', t0)
+    // peer-a is now on cooldown, but peer-b and peer-c start fresh
+    expect(validator.accept('peer-b', t0)).toBe(true)
+    expect(validator.accept('peer-c', t0)).toBe(true)
+    expect(validator.accept('peer-a', t0)).toBe(false)
+  })
+})
+
+describe('Cooldown — additional edge cases', () => {
+  it('msRemaining returns 0 before first use', () => {
+    const cooldown = new Cooldown(60_000)
+    expect(cooldown.msRemaining(1_000_000)).toBe(0)
+  })
+
+  it('msRemaining never returns a negative value', () => {
+    const cooldown = new Cooldown(1_000)
+    cooldown.markUsed(1_000_000)
+    expect(cooldown.msRemaining(1_002_000)).toBe(0) // well past interval
+  })
+
+  it('construction with a storageKey does not throw in environments without localStorage', () => {
+    // Node / vitest has no localStorage — the constructor should gracefully skip it
+    expect(() => new Cooldown(60_000, 'test-key')).not.toThrow()
+  })
 })
