@@ -289,10 +289,13 @@ code {
   line-height: 1.5;
 }
 
-.modal-icon {
-  font-size: 16px;
+.modal-dash {
+  color: #4a8fc4;
+  font-size: 14px;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
+  line-height: 1;
+  user-select: none;
 }
 
 .modal-close-btn {
