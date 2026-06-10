@@ -95,6 +95,7 @@ export class Hud {
       this.cooldownBar.style.width = '100%'
       this.cooldownBar.classList.add('ready')
       this.cooldownState = 'animating'
+      soundEngine.playPixelReady()
       this.cooldownPulseTimer = setTimeout(() => {
         this.cooldownBar.classList.add('pulse')
         this.cooldownBar.classList.remove('ready')
